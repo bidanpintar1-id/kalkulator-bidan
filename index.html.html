@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Tarif Layanan Home Care Kebidanan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --coral: #993C1D;
+    --coral-light: #FAECE7;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e2e0d8;
+    --bg: #faf9f7;
+    --white: #ffffff;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--teal) 0%, #0a4f3d 100%);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+  .header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+  .header p { font-size: 13px; opacity: 0.85; }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  .formula-box {
+    background: var(--teal-light);
+    border: 1px solid #9FE1CB;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--teal);
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+    text-align: center;
+  }
+  .formula-box strong { color: var(--teal); font-size: 14px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--teal-mid); color: var(--teal); }
+  .tab.active { background: var(--teal); color: white; border-color: var(--teal); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0ede8;
+  }
+  .field-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .field-label { flex: 1; min-width: 0; font-size: 14px; }
+  .field-label small { display: block; font-size: 11px; color: var(--text-muted); }
+  .field-input {
+    width: 120px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    text-align: right;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  .field-input:focus { border-color: var(--teal-mid); background: white; }
+  .field-input::-webkit-outer-spin-button,
+  .field-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .field-unit { font-size: 13px; color: var(--text-muted); width: 32px; flex-shrink: 0; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .metric {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .metric-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .metric.highlight { background: var(--teal); border-color: var(--teal); }
+  .metric.highlight .metric-label { color: rgba(255,255,255,0.8); }
+  .metric.highlight .metric-value { color: white; font-size: 20px; }
+
+  .insight-box {
+    background: var(--blue-light);
+    border: 1px solid #B5D4F4;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  /* ROI */
+  .roi-box {
+    background: var(--green-light);
+    border: 1px solid #C0DD97;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .roi-title { font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 12px; }
+  .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .roi-row:last-child { border-bottom: none; }
+  .roi-key { color: var(--text-muted); }
+  .roi-val { font-weight: 600; color: var(--text); }
+  .roi-big { font-size: 18px; color: var(--green); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+
+  /* Bars */
+  .bar-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .bar-label { font-size: 12px; color: var(--text-muted); width: 130px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; height: 12px; background: var(--gray-light); border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+  .bar-pct { font-size: 12px; color: var(--text-muted); width: 36px; font-weight: 600; }
+
+  /* Paket */
+  .paket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+  .paket-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+  }
+  .paket-card.featured { border: 2px solid var(--teal-mid); }
+  .paket-name { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .paket-price { font-size: 17px; font-weight: 700; color: var(--text); }
+  .paket-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* Checklist */
+  .checklist-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .check-icon { color: var(--teal-mid); font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+  .check-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .tips-box {
+    background: var(--amber-light);
+    border: 1px solid #FAC775;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--amber);
+    margin-top: 1rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    .header h1 { font-size: 1.2rem; }
+    .field-input { width: 100px; }
+    .result-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">🌿 Tools Eksklusif Ebook</div>
+  <h1>Kalkulator Tarif Layanan<br>Home Care Kebidanan</h1>
+  <p>Hitung BOP & tarif profesional Anda dalam hitungan menit</p>
+</div>
+
+<div class="container">
+
+  <div class="formula-box">
+    <strong>Formula Tarif:</strong><br>
+    Tarif = BHP + Depresiasi Alat + Transportasi + Jasa Keahlian + Admin & Marketing + Margin Profit
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('kalkulator', this)">🧮 Kalkulator Tarif</button>
+    <button class="tab" onclick="switchTab('roi', this)">📈 Analisis ROI</button>
+    <button class="tab" onclick="switchTab('komposisi', this)">🥧 Komposisi Biaya</button>
+  </div>
+
+  <!-- TAB 1: KALKULATOR -->
+  <div id="panel-kalkulator" class="panel active">
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#E1F5EE; color:#0F6E56;">💧</span>
+        1. Biaya Bahan Habis Pakai (BHP)
+      </div>
+      <div class="field-row">
+        <div class="field-label">Kapas &amp; alkohol <small>per tindakan</small></div>
+        <input class="field-input" type="number" id="bhp1" value="3000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Minyak pijat <small>per tindakan</small></div>
+        <input class="field-input" type="number" id="bhp2" value="5000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Sarung tangan &amp; masker <small>per pasang</small></div>
+        <input class="field-input" type="number" id="bhp3" value="4000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Underpad <small>per lembar</small></div>
+        <input class="field-input" type="number" id="bhp4" value="3000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">BHP lainnya <small>sabun bayi, dll</small></div>
+        <input class="field-input" type="number" id="bhp5" value="2000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#EEEDFE; color:#534AB7;">🔧</span>
+        2. Penyusutan Alat (Depresiasi)
+      </div>
+      <div class="field-row">
+        <div class="field-label">Bathtub bayi <small>Rp1.000.000 ÷ 500 pemakaian = Rp2.000/tindakan</small></div>
+        <input class="field-input" type="number" id="dep1" value="2000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Alat pijat &amp; perawatan <small>per tindakan</small></div>
+        <input class="field-input" type="number" id="dep2" value="1500" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Perlengkapan lain <small>stetoskop, termometer, dll</small></div>
+        <input class="field-input" type="number" id="dep3" value="1000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#FAEEDA; color:#BA7517;">🚗</span>
+        3. Biaya Transportasi (Khusus Home Care)
+      </div>
+      <div class="field-row">
+        <div class="field-label">Jarak tempuh <small>km pulang-pergi</small></div>
+        <input class="field-input" type="number" id="km" value="10" min="0" oninput="calc()">
+        <span class="field-unit">km</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Biaya per km <small>bensin + keausan kendaraan</small></div>
+        <input class="field-input" type="number" id="perkm" value="2000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div id="trans-total" style="text-align:right; font-size:13px; color:var(--amber); margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#EEEDFE; color:#534AB7;">👩‍⚕️</span>
+        4. Jasa Keahlian (Fee Profesional Bidan)
+      </div>
+      <div class="field-row">
+        <div class="field-label">Fee bidan <small>nilai keahlian &amp; waktu Anda</small></div>
+        <input class="field-input" type="number" id="skill" value="100000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Durasi layanan <small>jam (untuk hitung tarif/jam)</small></div>
+        <input class="field-input" type="number" id="durasi" value="2" min="0.5" step="0.5" oninput="calc()">
+        <span class="field-unit">jam</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#FAECE7; color:#993C1D;">📣</span>
+        5. Biaya Administrasi &amp; Marketing
+      </div>
+      <div class="field-row">
+        <div class="field-label">Kuota internet &amp; promosi <small>biaya bulanan ÷ jumlah pasien</small></div>
+        <input class="field-input" type="number" id="adm1" value="5000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Admin platform (Lynk.id dll) <small>per transaksi</small></div>
+        <input class="field-input" type="number" id="adm2" value="3000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Cetak kartu nama &amp; materi <small>dibagi estimasi pasien</small></div>
+        <input class="field-input" type="number" id="adm3" value="2000" min="0" oninput="calc()">
+        <span class="field-unit">Rp</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#EAF3DE; color:#3B6D11;">📊</span>
+        6. Margin Profit
+      </div>
+      <div class="field-row">
+        <div class="field-label">Persentase margin profit</div>
+        <input class="field-input" type="number" id="margin" value="30" min="0" max="100" oninput="calc()">
+        <span class="field-unit">%</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="result-grid">
+      <div class="metric">
+        <div class="metric-label">Total BOP (Modal)</div>
+        <div class="metric-value" id="res-bop">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Nilai Margin Profit</div>
+        <div class="metric-value" id="res-margin">—</div>
+      </div>
+      <div class="metric highlight">
+        <div class="metric-label">Tarif Rekomendasi</div>
+        <div class="metric-value" id="res-tarif">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Tarif per Jam</div>
+        <div class="metric-value" id="res-perjam">—</div>
+      </div>
+    </div>
+
+    <div class="insight-box" id="res-insight">
+      Isi komponen biaya di atas — tarif optimal Anda akan muncul otomatis.
+    </div>
+
+    <div class="tips-box">
+      💡 <strong>Tips:</strong> Jika hasil tarif terasa "terlalu mahal", bandingkan dengan waktu &amp; keahlian yang Anda keluarkan. Bidan yang underpricing rugi tanpa sadar!
+    </div>
+  </div>
+
+  <!-- TAB 2: ROI -->
+  <div id="panel-roi" class="panel">
+
+    <div class="card">
+      <div class="section-title">
+        <span class="section-icon" style="background:#EAF3DE; color:#3B6D11;">📘</span>
+        Analisis ROI — Investasi Ebook Rp150.000
+      </div>
+      <div class="field-row">
+        <div class="field-label">Harga jual layanan Anda <small>setelah menggunakan panduan ebook</small></div>
+        <input class="field-input" type="number" id="roi-tarif" value="200000" min="0" oninput="calcRoi()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">BOP per tindakan <small>ambil dari Kalkulator Tarif</small></div>
+        <input class="field-input" type="number" id="roi-bop" value="130000" min="0" oninput="calcRoi()">
+        <span class="field-unit">Rp</span>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Target pasien per bulan</div>
+        <input class="field-input" type="number" id="roi-pasien" value="10" min="1" oninput="calcRoi()">
+        <span class="field-unit">org</span>
+      </div>
+    </div>
+
+    <div class="roi-box">
+      <div class="roi-title">📈 Proyeksi Return on Investment Ebook</div>
+      <div class="roi-row">
+        <span class="roi-key">Investasi ebook</span>
+        <span class="roi-val">Rp 150.000</span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-key">Profit bersih per tindakan</span>
+        <span class="roi-val" id="roi-profit-per">—</span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-key">Balik modal setelah</span>
+        <span class="roi-val" id="roi-balik">—</span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-key">Profit bersih bulan pertama</span>
+        <span class="roi-val" id="roi-bulan1">—</span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-key">ROI bulan pertama</span>
+        <span class="roi-val" id="roi-pct">—</span>
+      </div>
+      <hr class="divider" style="margin:10px 0;">
+      <div class="roi-row">
+        <span class="roi-key" style="font-weight:600; color:var(--text);">Penghasilan tambahan per tahun</span>
+        <span class="roi-val roi-big" id="roi-tahunan">—</span>
+      </div>
+    </div>
+
+    <div class="insight-box" id="roi-insight">
+      Isi data di atas untuk melihat proyeksi ROI Anda.
+    </div>
+
+    <div class="card">
+      <div class="section-title">Mengapa ini investasi, bukan pengeluaran?</div>
+      <div class="checklist-item">
+        <span class="check-icon">✅</span>
+        <span class="check-text">Ebook mengajarkan cara menetapkan tarif yang tepat — bidan yang <em>underpricing</em> bisa rugi jutaan per bulan tanpa sadar.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="check-icon">✅</span>
+        <span class="check-text">Strategi marketing yang tepat = lebih banyak pasien = ROI berlipat setiap bulan.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="check-icon">✅</span>
+        <span class="check-text">Hanya butuh <strong>1 pasien pertama</strong> untuk balik modal — pasien selanjutnya adalah murni keuntungan.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="check-icon">✅</span>
+        <span class="check-text">Ilmu di ebook digunakan seumur karir — investasi Rp150.000 vs. penghasilan bertahun-tahun.</span>
+      </div>
+      <div class="checklist-item">
+        <span class="check-icon">✅</span>
+        <span class="check-text">Bidan yang tahu BOP-nya dengan tepat lebih percaya diri pasang tarif — tidak lagi minder atau ragu-ragu.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: KOMPOSISI -->
+  <div id="panel-komposisi" class="panel">
+
+    <div class="card">
+      <div class="section-title">Komposisi Biaya Operasional per Tindakan</div>
+      <div id="bar-container">
+        <p style="font-size:13px; color:var(--text-muted);">Isi data di tab Kalkulator Tarif terlebih dahulu, lalu kembali ke sini.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Rekomendasi Paket Layanan</div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Berdasarkan tarif dasar Anda, berikut pilihan paket yang bisa ditawarkan ke pasien:</p>
+      <div id="paket-list">
+        <p style="font-size:13px; color:var(--text-muted);">Hitung tarif di tab pertama untuk melihat rekomendasi paket.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Panduan Proporsi Sehat</div>
+      <div style="font-size:13px; color:var(--text-muted); line-height:1.8;">
+        <div>🟢 <strong>Jasa Keahlian:</strong> idealnya <strong>50–70%</strong> dari total BOP</div>
+        <div>🔵 <strong>BHP + Depresiasi:</strong> sekitar <strong>15–25%</strong></div>
+        <div>🟡 <strong>Transportasi:</strong> usahakan <strong>≤ 10%</strong></div>
+        <div>🟠 <strong>Admin &amp; Marketing:</strong> <strong>5–10%</strong></div>
+        <div style="margin-top:10px; padding:10px; background:var(--teal-light); border-radius:var(--radius-sm); color:var(--teal);">
+          ⚠️ Jika margin profit Anda <strong>di bawah 20%</strong>, kemungkinan besar tarif Anda terlalu rendah. Naikkan secara bertahap dan komunikasikan nilai layanan Anda dengan percaya diri.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  🌿 Kalkulator ini adalah bonus eksklusif dari Ebook Bisnis Home Care Kebidanan<br>
+  Dibuat untuk membantu bidan Indonesia menetapkan tarif yang adil &amp; profesional
+</footer>
+
+<script>
+function fmt(n) {
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+function v(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function calc() {
+  const bhp  = v('bhp1') + v('bhp2') + v('bhp3') + v('bhp4') + v('bhp5');
+  const dep  = v('dep1') + v('dep2') + v('dep3');
+  const trans = v('km') * v('perkm');
+  const skill = v('skill');
+  const adm  = v('adm1') + v('adm2') + v('adm3');
+  const bop  = bhp + dep + trans + skill + adm;
+  const marginPct = v('margin') / 100;
+  const marginVal = bop * marginPct;
+  const tarif = bop + marginVal;
+  const durasi = Math.max(0.5, v('durasi'));
+  const perjam = tarif / durasi;
+
+  document.getElementById('trans-total').textContent =
+    trans > 0 ? 'Biaya transportasi: ' + fmt(trans) : '';
+
+  document.getElementById('res-bop').textContent    = fmt(bop);
+  document.getElementById('res-margin').textContent = fmt(marginVal);
+  document.getElementById('res-tarif').textContent  = fmt(tarif);
+  document.getElementById('res-perjam').textContent = fmt(perjam);
+
+  const insightEl = document.getElementById('res-insight');
+  if (bop > 0) {
+    const efisien = skill / bop * 100;
+    const status = efisien >= 50 ? '✅ Proporsi jasa keahlian sudah sehat.' : '⚠️ Proporsi jasa keahlian masih rendah — pertimbangkan naikkan fee profesional Anda.';
+    insightEl.innerHTML = 'BOP total <strong>' + fmt(bop) + '</strong> · Jasa keahlian '
+      + efisien.toFixed(0) + '% dari BOP · ' + status
+      + ' Tarif rekomendasi <strong>' + fmt(tarif) + '</strong> sudah mencakup margin '
+      + v('margin') + '%.';
+  }
+
+  document.getElementById('roi-bop').value = Math.round(bop);
+  calcRoi();
+  updateBars(bhp, dep, trans, skill, adm, bop, tarif, marginVal);
+}
+
+function updateBars(bhp, dep, trans, skill, adm, bop, tarif, marginVal) {
+  if (bop <= 0) return;
+  const total = tarif;
+  const items = [
+    { label: 'BHP',              val: bhp,       color: '#1D9E75' },
+    { label: 'Depresiasi Alat',  val: dep,       color: '#534AB7' },
+    { label: 'Transportasi',     val: trans,     color: '#BA7517' },
+    { label: 'Jasa Keahlian',    val: skill,     color: '#185FA5' },
+    { label: 'Admin & Marketing',val: adm,       color: '#993C1D' },
+    { label: 'Margin Profit',    val: marginVal, color: '#3B6D11' },
+  ];
+  const container = document.getElementById('bar-container');
+  container.innerHTML = items.map(item => {
+    const pct = total > 0 ? (item.val / total * 100) : 0;
+    return '<div class="bar-item">'
+      + '<div class="bar-label">' + item.label + '</div>'
+      + '<div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(1) + '%; background:' + item.color + ';"></div></div>'
+      + '<div class="bar-pct">' + pct.toFixed(0) + '%</div>'
+      + '</div>';
+  }).join('')
+    + '<div style="text-align:right; font-size:12px; color:var(--text-muted); margin-top:6px;">Total tarif = <strong>' + fmt(tarif) + '</strong></div>';
+
+  const roundUp = (n, m) => Math.ceil(n / m) * m;
+  const t1 = roundUp(tarif, 5000);
+  const t2 = roundUp(tarif * 1.5, 5000);
+  const t3 = roundUp(tarif * 2.2, 5000);
+
+  document.getElementById('paket-list').innerHTML =
+    '<div class="paket-grid">'
+    + '<div class="paket-card"><div class="paket-name">Paket Basic</div><div class="paket-price">' + fmt(t1) + '</div><div class="paket-desc">1 sesi standar</div></div>'
+    + '<div class="paket-card featured"><div class="paket-name" style="color:var(--teal);">⭐ Paket Standar</div><div class="paket-price">' + fmt(t2) + '</div><div class="paket-desc">Sesi + konsultasi</div></div>'
+    + '<div class="paket-card"><div class="paket-name">Paket Premium</div><div class="paket-price">' + fmt(t3) + '</div><div class="paket-desc">Full service + edukasi</div></div>'
+    + '</div>';
+}
+
+function calcRoi() {
+  const ebook   = 150000;
+  const tarifJual = v('roi-tarif');
+  const bop     = v('roi-bop');
+  const pasien  = Math.max(1, v('roi-pasien'));
+  const profitPer  = tarifJual - bop;
+  const balik   = profitPer > 0 ? Math.ceil(ebook / profitPer) : null;
+  const profitBulan1 = (profitPer * pasien) - ebook;
+  const roi     = ebook > 0 ? (profitBulan1 / ebook * 100) : 0;
+  const tahunan = profitPer * pasien * 12;
+
+  document.getElementById('roi-profit-per').textContent = fmt(profitPer);
+  document.getElementById('roi-balik').textContent =
+    balik !== null ? balik + ' pasien' : 'Cek: tarif < BOP';
+  document.getElementById('roi-bulan1').textContent = fmt(profitBulan1);
+  document.getElementById('roi-pct').innerHTML =
+    '<span class="badge ' + (roi >= 0 ? 'badge-green' : 'badge-amber') + '">' + roi.toFixed(0) + '%</span>';
+  document.getElementById('roi-tahunan').textContent = fmt(tahunan);
+
+  const el = document.getElementById('roi-insight');
+  if (tarifJual > 0 && bop > 0) {
+    if (balik !== null && balik <= 1) {
+      el.innerHTML = '🎉 <strong>Hanya 1 pasien sudah cukup untuk balik modal!</strong> Pasien ke-2 dan seterusnya adalah murni keuntungan bersih ' + fmt(profitPer) + ' per tindakan.';
+    } else if (balik !== null) {
+      el.innerHTML = 'Dibutuhkan <strong>' + balik + ' pasien</strong> untuk balik modal investasi ebook. Setelah itu, setiap pasien menghasilkan profit bersih <strong>' + fmt(profitPer) + '</strong>.';
+    } else {
+      el.textContent = 'Pastikan tarif jual lebih besar dari BOP agar menghasilkan profit.';
+    }
+  }
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'komposisi') calc();
+}
+
+calc();
+calcRoi();
+</script>
+</body>
+</html>
